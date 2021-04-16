@@ -1,13 +1,17 @@
 <template>
   <div>
     <div class="table-title" style="display: inline-block;">
-      <div style="display: inline-block">
-        <p>년 필터링</p> <input id="year" v-model="year" placeholder="여기를 수정해보세요">
+      <div class="filter">
+        <p>년 필터링</p>
+        <v-text-field solo v-model="year" rounded placeholder="year"></v-text-field>
       </div>
-      <div style="display: inline-block">
-        <p>월 필터링</p> <input id="month" v-model="month" placeholder="여기를 수정해보세요">
+      <div class="filter">
+        <p>월 필터링</p>
+        <v-text-field solo v-model="month" rounded placeholder="month"></v-text-field>
       </div>
-      <button id="getUserBtn" v-on:click="getMemberList(year, month)">가져오기</button>
+      <v-btn rounded color="primary" dark v-on:click="getMemberList(year, month)">
+        가져오기
+      </v-btn>
     </div>
     <div class="table-title">
       <h3>
@@ -25,7 +29,7 @@
         <div class="content__index">순위</div>
         <div class="content__user">멤버</div>
         <div class="content__get">받은 ❤️</div>
-        <div class="content__using">보낸 ❤️</div>
+        <div class="content__using">오늘 남은 ❤️</div>
       </div>
       <div v-for="(user, index) in users" v-bind:key="user.id" class="content">
           <div class="content__index">
@@ -38,8 +42,8 @@
             <img class="avatar" :src="user.avatar_url">
             {{ user.username }}
           </div>
-          <div class="content__get">❣️ x {{ user.received_reaction }}</div>
-          <div class="content__using">❣️ x {{ user.my_reaction }}</div>
+          <div class="content__get"><span class="received_reaction">{{ user.received_reaction }}</span></div>
+          <div class="content__using"><span class="my_reaction">{{ user.my_reaction }}</span></div>
       </div>
     </div>
   </div>
@@ -55,7 +59,7 @@ export default {
     var date = new Date();
 
     return {
-      title: "✨무야호~그만큼 고맙다는거지~랭킹✨",
+      title: "✨무야호~그만큼 고맙다는거지! Emoji Rank✨",
       year: date.getFullYear(),
       month: date.getMonth() + 1,
       users: []
@@ -68,7 +72,9 @@ export default {
   },
   methods: {
     getMemberList: function (year, month) {
-      // using JSONPlaceholder
+      if(year === '') year = null
+      if(month === '') month = null
+
       var config = {
         headers: {'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,OPTIONS'},
         params: {'year': year, 'month': month},
@@ -123,6 +129,7 @@ export default {
     box-shadow: 3px 3px 3px grey;
     display: block;
     font-weight: bold;
+    background: powderblue;
     margin-bottom: 5px;
   }
 
@@ -135,7 +142,8 @@ export default {
     border-radius: 30px;
     box-shadow: 3px 3px 3px grey;
     display: block;
-    margin-bottom: 5px;
+    font-weight: bold;
+    margin-bottom: 10px;
   }
 
   .content:hover {
@@ -171,12 +179,33 @@ export default {
     vertical-align: middle;
   }
 
+  .filter {
+    display: inline-block;
+    width: 100px;
+    margin-right: 20px;
+  }
+
+  .filter p{
+    margin: 10px;
+  }
+
   @keyframes text-in {
     0% {
       transform: translate(0, -20px);
       opacity: 0;
     }
   }
+
+  .received_reaction {
+    font-size: large;
+    color: red;
+  }
+
+  .my_reaction {
+    font-size: large;
+    color: green;
+  }
+
   .item {
     display: inline-block;
     min-width: 0.3em;
