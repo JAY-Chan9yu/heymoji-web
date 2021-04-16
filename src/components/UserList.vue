@@ -1,5 +1,14 @@
 <template>
   <div>
+    <div class="table-title" style="display: inline-block;">
+      <div style="display: inline-block">
+        <p>년 필터링</p> <input id="year" v-model="year" placeholder="여기를 수정해보세요">
+      </div>
+      <div style="display: inline-block">
+        <p>월 필터링</p> <input id="month" v-model="month" placeholder="여기를 수정해보세요">
+      </div>
+      <button id="getUserBtn" v-on:click="getMemberList(year, month)">가져오기</button>
+    </div>
     <div class="table-title">
       <h3>
         <span
@@ -29,8 +38,8 @@
             <img class="avatar" :src="user.avatar_url">
             {{ user.username }}
           </div>
-          <div class="content__get">❣️ x {{ user.get_emoji_count }}</div>
-          <div class="content__using">❣️ x {{ user.using_emoji_count }}</div>
+          <div class="content__get">❣️ x {{ user.received_reaction }}</div>
+          <div class="content__using">❣️ x {{ user.my_reaction }}</div>
       </div>
     </div>
   </div>
@@ -43,31 +52,38 @@ export default {
   name: 'UserList',
   data: function () {
     // this.methods.searchTerm();
+    var date = new Date();
+
     return {
       title: "✨무야호~그만큼 고맙다는거지~랭킹✨",
+      year: date.getFullYear(),
+      month: date.getMonth() + 1,
       users: []
     }
   },
   computed: {
     hasResult: function () {
       return this.users.length > 0
-    }
+    },
   },
   methods: {
-    searchTerm: function () {
+    getMemberList: function (year, month) {
       // using JSONPlaceholder
       var config = {
-        headers: {'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,OPTIONS'}
+        headers: {'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,OPTIONS'},
+        params: {'year': year, 'month': month},
       }
       const baseURI = 'HOST_ADDRESS';
-      axios.get(`${baseURI}/users`, config).then((result) => {
-        console.log(result)
-        this.users = result.data
-      })
-    }
+
+      axios.get(`${baseURI}/users`, config)
+          .then((result) => {
+            console.log(result)
+            this.users = result.data
+          })
+    },
   },
-  beforeMount() {
-    this.searchTerm();
+  mounted() {
+    this.getMemberList(this.year, this.month);
   }
 }
 </script>
