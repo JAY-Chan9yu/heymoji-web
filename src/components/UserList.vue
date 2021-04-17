@@ -1,5 +1,16 @@
 <template>
   <div>
+    <div class="table-title">
+      <h3>
+        <span
+          v-for="(t, index) in title"
+          :key="index"
+          class="item"
+          :style="{animationDelay: index*100+'ms'}"
+          v-text="t"
+        />
+      </h3>
+    </div>
     <div class="table-title" style="display: inline-block;">
       <div class="filter">
         <p>년 필터링</p>
@@ -12,17 +23,6 @@
       <v-btn rounded color="primary" dark v-on:click="getMemberList(year, month)">
         가져오기
       </v-btn>
-    </div>
-    <div class="table-title">
-      <h3>
-        <span
-          v-for="(t, index) in title"
-          :key="index"
-          class="item"
-          :style="{animationDelay: index*100+'ms'}"
-          v-text="t"
-        />
-      </h3>
     </div>
     <div v-if="hasResult">
       <div class="content-desc">
@@ -79,7 +79,7 @@ export default {
         headers: {'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,OPTIONS'},
         params: {'year': year, 'month': month},
       }
-      const baseURI = 'HOST_ADDRESS';
+      const baseURI = "HOST_ADDRESS";
 
       axios.get(`${baseURI}/users`, config)
           .then((result) => {

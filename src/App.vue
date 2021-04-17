@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <img src="./assets/emoji_rank_logo.png" width="200px">
     <div v-if="isLoading">
       <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
     </div>
