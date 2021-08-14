@@ -11,55 +11,50 @@
         />
       </h3>
     </div>
+
     <div class="table-title" style="display: inline-block;">
       <div class="filter">
-        <p>년 필터링</p>
         <v-text-field solo v-model="year" rounded placeholder="year"></v-text-field>
       </div>
       <div class="filter">
-        <p>월 필터링</p>
         <v-text-field solo v-model="month" rounded placeholder="month"></v-text-field>
       </div>
-      <v-btn rounded color="primary" dark v-on:click="getMemberList(year, month)">
+      <v-btn rounded v-on:click="getMemberList(year, month)" color="rgb(255, 111, 97)" style="color: white; font-weight: bolder">
         가져오기
       </v-btn>
     </div>
-    <div v-if="hasResult">
-      <div class="content-desc">
-        <div class="content__index">순위</div>
-        <div class="content__user">멤버</div>
-        <div class="content__get">받은 ❤️</div>
-        <div class="content__using">오늘 남은 ❤️</div>
-      </div>
-      <div v-for="(user, index) in users" v-bind:key="user.id" class="content">
+
+    <div>💡이름 옆 숫자는 크루들에게 받은 이모지 모든 합계입니다.</div>
+
+    <div v-if="hasResult" class="container" >
+      <div v-for="(user, index) in users" v-bind:key="user.id" class="content" v-on:click="getReactionList(user.id)">
           <div class="content__index">
-            <span v-if="index === 0">🥇</span>
-            <span v-else-if="index === 1">🥈</span>
-            <span v-else-if="index === 2">🥉</span>
-            <span v-else>{{ index + 1 }}</span>
+            <span>{{ index + 1 }}.</span>
           </div>
-          <div class="content__user">
-            <img class="avatar" :src="user.avatar_url">
-            {{ user.username }}
-          </div>
+          <div class="content__user"><img class="avatar" :src="user.avatar_url"> {{ user.username }}</div>
           <div class="content__get"><span class="received_reaction">{{ user.received_reaction }}</span></div>
-          <div class="content__using"><span class="my_reaction">{{ user.my_reaction }}</span></div>
-      </div>
+<!--          <v-btn rounded  color="#dddddd" style="color: black; font-weight: bolder">상세보기</v-btn>-->
+          <reaction-list data-active="false" :ref="'reaction-' + user.id" :title=reactionTitle style="display: block"></reaction-list>
+        </div>
     </div>
   </div>
 </template>
 
 <script>
 import axios from 'axios'
+import ReactionList from "./ReactionList";
 
 export default {
   name: 'UserList',
+  components: {
+    'reaction-list': ReactionList
+  },
   data: function () {
-    // this.methods.searchTerm();
-    var date = new Date();
+    let date = new Date();
 
     return {
-      title: "✨무야호~그만큼 고맙다는거지! Emoji Rank✨",
+      title: "✨최고의 동료가 최고의 복지다✨",
+      reactionTitle: "리액션한 크루 리스트",
       year: date.getFullYear(),
       month: date.getMonth() + 1,
       users: []
@@ -75,17 +70,44 @@ export default {
       if(year === '') year = null
       if(month === '') month = null
 
-      var config = {
-        headers: {'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,OPTIONS'},
+      let config = {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,OPTIONS'
+        },
         params: {'year': year, 'month': month},
       }
       const baseURI = "HOST_ADDRESS";
 
       axios.get(`${baseURI}/users`, config)
+        .then((result) => {
+          // console.log(result)
+          this.users = result.data
+        })
+    },
+    getReactionList: function (userId) {
+      let config = {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,OPTIONS'
+        },
+      }
+      const baseURI = "HOST_ADDRESS";
+      let isActive = this.$refs['reaction-'+ userId][0].$attrs['data-active'];
+
+      // false = 리액션한 크루들의 리스트를 보여준다.
+      // true = 리스트를 접는다.
+      if (isActive === 'false') {
+        axios.get(`${baseURI}/users/${userId}/reactions/`, config)
           .then((result) => {
-            console.log(result)
-            this.users = result.data
+            // console.log(result.data);
+            this.$refs['reaction-' + userId][0].setValue(result.data)
+            this.$refs['reaction-'+ userId][0].$attrs['data-active'] = "true"
           })
+      } else {
+        this.$refs['reaction-'+ userId][0].$attrs['data-active'] = "false"
+        this.$refs['reaction-' + userId][0].setValue([])
+      }
     },
   },
   mounted() {
@@ -110,6 +132,11 @@ export default {
     width: 100%;
   }
 
+  .container {
+    align-items: center;
+    width: 100%;
+  }
+
   .table-title h3 {
      color: black;
      font-size: 30px;
@@ -119,35 +146,21 @@ export default {
      text-transform:uppercase;
   }
 
-  .content-desc {
-    margin: auto;
-    max-width: 600px;
-    padding:5px;
-    width: 100%;
-    border: 1px solid #343a45;
-    border-radius: 30px;
-    box-shadow: 3px 3px 3px grey;
-    display: block;
-    font-weight: bold;
-    background: powderblue;
-    margin-bottom: 5px;
-  }
-
   .content {
-    margin: auto;
-    max-width: 600px;
-    padding:5px;
-    width: 100%;
-    border: 1px solid #343a45;
-    border-radius: 30px;
-    box-shadow: 3px 3px 3px grey;
-    display: block;
+    min-height: 70px;
+    padding:15px;
+    margin: 10px;
+    width: 550px;
+    border: 1px solid #dddddd;
+    border-radius: 10px;
+    box-shadow: 3px 3px 3px #dddddd;
+    display: inline-block;
+    /*float: left;*/
     font-weight: bold;
-    margin-bottom: 10px;
   }
 
   .content:hover {
-    background-color: #CCFFFF;
+    box-shadow: 0 0 10px 3px mediumseagreen;
   }
 
   .content__index {
@@ -198,12 +211,7 @@ export default {
 
   .received_reaction {
     font-size: large;
-    color: red;
-  }
-
-  .my_reaction {
-    font-size: large;
-    color: green;
+    color: coral;
   }
 
   .item {
